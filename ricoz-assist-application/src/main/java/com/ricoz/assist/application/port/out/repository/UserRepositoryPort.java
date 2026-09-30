@@ -1,0 +1,23 @@
+package com.ricoz.assist.application.port.out.repository;
+
+import com.ricoz.assist.core.domain.User;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface UserRepositoryPort {
+    User save(User user);
+
+    Optional<User> findById(UUID id);
+
+    Optional<User> findByUsername(String username);
+
+    Optional<User> findByEmail(String email);
+
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
+
+    List<User> findAllActiveUsers();
+}
