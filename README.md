@@ -147,15 +147,3 @@ Running the application with the default `dev` profile uses PostgreSQL; set `DB_
 ```bash
 mvn clean package -Pprod
 ```
-
-### Code formatting
-
-The project uses standard Java formatting conventions.
-
-## License
-
-[Specify your license here]
-
-## Contact
-
-For questions or support, please contact [your contact information].
