@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/ricoz_assist_dev
-    username: postgres
-    password: postgres
+    username: ${DB_USERNAME:ricoz_user}
+    password: ${DB_PASSWORD:ricoz_password}
   redis:
     host: localhost
     port: 6379

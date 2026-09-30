@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ricoz-assist-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ricoz_assist}
+      POSTGRES_USER: ${POSTGRES_USER:-ricoz_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ricoz_user -d ricoz_assist"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ricoz-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ricoz-assist-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ricoz-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ricoz-assist-app
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ricoz_assist
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-ricoz_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ricoz-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ricoz-network:
+    driver: bridge
