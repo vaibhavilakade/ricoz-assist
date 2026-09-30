@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import { cn } from '../../utils/cn';

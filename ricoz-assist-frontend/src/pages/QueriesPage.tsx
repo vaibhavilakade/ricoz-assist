@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useUIStore } from '../store/uiStore';
 import { queryService } from '../services/queryService';
@@ -6,7 +6,6 @@ import { QueryDTO, QueryType } from '../types/domain';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Badge from '../components/common/Badge';
-import LoadingSpinner from '../components/common/LoadingSpinner';
 import Select from '../components/common/Select';
 import { QUERY_TYPES, QUERY_STATUSES } from '../utils/constants';
 import { Send } from 'lucide-react';
@@ -63,7 +62,7 @@ const QueriesPage = () => {
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     loadHistory();
   }, [user?.id]);
 

@@ -10,7 +10,6 @@ import {
   MessageSquare,
   Users,
   LogOut,
-  Menu,
   X,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
