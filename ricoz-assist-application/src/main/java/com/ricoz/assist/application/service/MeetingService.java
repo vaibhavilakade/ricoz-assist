@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +33,9 @@ public class MeetingService {
         meeting.setOwner(userRepository.findById(meeting.getOwner().getId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "User not found with id: " + meeting.getOwner().getId())));
+        if (meeting.getParticipants() == null) {
+            meeting.setParticipants(new HashSet<>());
+        }
         if (meeting.getParticipants() != null) {
             Set<User> participants = meeting.getParticipants().stream()
                     .map(participant -> userRepository.findById(participant.getId())
@@ -101,6 +105,9 @@ public class MeetingService {
         
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        if (meeting.getParticipants() == null) {
+            meeting.setParticipants(new HashSet<>());
+        }
         meeting.getParticipants().add(user);
         meeting.setUpdatedAt(LocalDateTime.now());
         
@@ -113,7 +120,9 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("Meeting not found with id: " + meetingId));
         
-        meeting.getParticipants().removeIf(p -> p.getId().equals(userId));
+        if (meeting.getParticipants() != null) {
+            meeting.getParticipants().removeIf(p -> p.getId().equals(userId));
+        }
         meeting.setUpdatedAt(LocalDateTime.now());
         
         return meetingRepository.save(meeting);

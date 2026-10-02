@@ -9,9 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -19,14 +21,24 @@ public interface MeetingRepository extends JpaRepository<Meeting, UUID>, Meeting
 
     Page<Meeting> findByOwner(User owner, Pageable pageable);
 
+    @Override
+    @EntityGraph(attributePaths = {"owner", "participants"})
+    Optional<Meeting> findById(UUID id);
+
+    @Override
+    @EntityGraph(attributePaths = {"owner", "participants"})
+    @Query("SELECT DISTINCT m FROM Meeting m WHERE m.owner.id = :ownerId AND m.deleted = false")
     List<Meeting> findByOwnerId(UUID ownerId);
 
+    @EntityGraph(attributePaths = {"owner", "participants"})
     @Query("SELECT m FROM Meeting m WHERE m.owner.id = :ownerId AND m.status = :status AND m.deleted = false")
     List<Meeting> findByOwnerIdAndStatus(@Param("ownerId") UUID ownerId, @Param("status") Meeting.MeetingStatus status);
 
+    @EntityGraph(attributePaths = {"owner", "participants"})
     @Query("SELECT m FROM Meeting m WHERE m.scheduledStart BETWEEN :start AND :end AND m.deleted = false")
     List<Meeting> findByScheduledStartBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+    @EntityGraph(attributePaths = {"owner", "participants"})
     @Query("SELECT m FROM Meeting m WHERE :participant MEMBER OF m.participants AND m.deleted = false")
     List<Meeting> findByParticipant(@Param("participant") User participant);
 

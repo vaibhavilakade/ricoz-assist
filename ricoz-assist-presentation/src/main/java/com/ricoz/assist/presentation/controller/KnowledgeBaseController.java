@@ -25,6 +25,15 @@ public class KnowledgeBaseController {
     private final KnowledgeRetrievalService knowledgeRetrievalService;
     private final KnowledgeBaseMapper knowledgeBaseMapper;
 
+    @GetMapping
+    @Operation(summary = "Get all knowledge bases")
+    public ResponseEntity<List<KnowledgeBaseDTO>> getAllKnowledgeBases() {
+        List<KnowledgeBase> knowledgeBases = knowledgeRetrievalService.getAllKnowledgeBases();
+        return ResponseEntity.ok(knowledgeBases.stream()
+                .map(knowledgeBaseMapper::toDTO)
+                .collect(Collectors.toList()));
+    }
+
     @PostMapping
     @Operation(summary = "Create a new knowledge base")
     public ResponseEntity<KnowledgeBaseDTO> createKnowledgeBase(@Valid @RequestBody KnowledgeBaseDTO knowledgeBaseDTO) {
@@ -38,6 +47,22 @@ public class KnowledgeBaseController {
     public ResponseEntity<KnowledgeBaseDTO> getKnowledgeBaseById(@PathVariable UUID id) {
         KnowledgeBase kb = knowledgeRetrievalService.getKnowledgeBaseById(id);
         return ResponseEntity.ok(knowledgeBaseMapper.toDTO(kb));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a knowledge base")
+    public ResponseEntity<KnowledgeBaseDTO> updateKnowledgeBase(
+            @PathVariable UUID id, @Valid @RequestBody KnowledgeBaseDTO knowledgeBaseDTO) {
+        KnowledgeBase knowledgeBase = knowledgeBaseMapper.toEntity(knowledgeBaseDTO);
+        KnowledgeBase updated = knowledgeRetrievalService.updateKnowledgeBase(id, knowledgeBase);
+        return ResponseEntity.ok(knowledgeBaseMapper.toDTO(updated));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a knowledge base (soft delete)")
+    public ResponseEntity<Void> deleteKnowledgeBase(@PathVariable UUID id) {
+        knowledgeRetrievalService.deleteKnowledgeBase(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/indexed")

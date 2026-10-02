@@ -1,6 +1,7 @@
 package com.ricoz.assist.presentation.controller;
 
 import com.ricoz.assist.application.service.DocumentService;
+import com.ricoz.assist.application.service.UserService;
 import com.ricoz.assist.core.domain.Document;
 import com.ricoz.assist.presentation.dto.DocumentDTO;
 import com.ricoz.assist.presentation.dto.mapper.DocumentMapper;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +25,18 @@ import java.util.stream.Collectors;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final UserService userService;
     private final DocumentMapper documentMapper;
+
+    @GetMapping
+    @Operation(summary = "Get documents for the authenticated user")
+    public ResponseEntity<List<DocumentDTO>> getDocuments(Authentication authentication) {
+        UUID ownerId = userService.getUserByUsername(authentication.getName()).getId();
+        List<DocumentDTO> documents = documentService.getDocumentsByOwner(ownerId).stream()
+                .map(documentMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(documents);
+    }
 
     @PostMapping
     @Operation(summary = "Create a new document")

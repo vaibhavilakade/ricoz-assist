@@ -1,6 +1,7 @@
 package com.ricoz.assist.presentation.controller;
 
 import com.ricoz.assist.application.service.ActionItemService;
+import com.ricoz.assist.application.service.UserService;
 import com.ricoz.assist.core.domain.ActionItem;
 import com.ricoz.assist.presentation.dto.ActionItemDTO;
 import com.ricoz.assist.presentation.dto.mapper.ActionItemMapper;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,7 +27,18 @@ import java.util.stream.Collectors;
 public class ActionItemController {
 
     private final ActionItemService actionItemService;
+    private final UserService userService;
     private final ActionItemMapper actionItemMapper;
+
+    @GetMapping
+    @Operation(summary = "Get action items assigned to the authenticated user")
+    public ResponseEntity<List<ActionItemDTO>> getActionItems(Authentication authentication) {
+        UUID userId = userService.getUserByUsername(authentication.getName()).getId();
+        List<ActionItemDTO> actionItems = actionItemService.getActionItemsByAssignedTo(userId).stream()
+                .map(actionItemMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(actionItems);
+    }
 
     @PostMapping
     @Operation(summary = "Create a new action item")

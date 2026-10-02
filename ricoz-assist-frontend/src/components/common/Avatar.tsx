@@ -18,7 +18,7 @@ const Avatar = ({ firstName, lastName, className, size = 'md' }: AvatarProps) =>
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full bg-blue-600 font-medium text-white',
+        'flex items-center justify-center rounded-full bg-primary font-medium text-white ring-2 ring-white',
         sizeClasses[size],
         className
       )}

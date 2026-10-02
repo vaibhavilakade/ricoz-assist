@@ -9,17 +9,17 @@ interface BadgeProps {
 
 const Badge = ({ children, variant = 'default', className }: BadgeProps) => {
   const variantClasses = {
-    default: 'bg-gray-100 text-gray-800',
-    success: 'bg-green-100 text-green-800',
-    warning: 'bg-yellow-100 text-yellow-800',
-    danger: 'bg-red-100 text-red-800',
-    info: 'bg-blue-100 text-blue-800',
+    default: 'bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-200',
+    success: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/70',
+    warning: 'bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200/70',
+    danger: 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200/70',
+    info: 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-200/70',
   };
 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+        'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-150',
         variantClasses[variant],
         className
       )}

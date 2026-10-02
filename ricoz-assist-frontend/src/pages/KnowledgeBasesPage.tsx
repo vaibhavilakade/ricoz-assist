@@ -10,6 +10,9 @@ import EmptyState from '../components/common/EmptyState';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
 import Select from '../components/common/Select';
+import Textarea from '../components/common/Textarea';
+import PageHeader from '../components/common/PageHeader';
+import ErrorState from '../components/common/ErrorState';
 import { ACCESS_LEVELS } from '../utils/constants';
 import { Plus } from 'lucide-react';
 
@@ -17,6 +20,7 @@ const KnowledgeBasesPage = () => {
   const { addToast } = useUIStore();
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBaseDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -29,11 +33,13 @@ const KnowledgeBasesPage = () => {
   }, []);
 
   const loadKnowledgeBases = async () => {
+    setIsLoading(true);
+    setHasError(false);
     try {
       const kbs = await knowledgeBaseService.getAll();
       setKnowledgeBases(kbs);
-    } catch (error) {
-      console.error('Failed to load knowledge bases:', error);
+    } catch {
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -62,25 +68,22 @@ const KnowledgeBasesPage = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Knowledge Bases</h1>
-        <Button onClick={() => setIsModalOpen(true)}>
+      <PageHeader
+        title="Knowledge bases"
+        description="Organize shared knowledge and make your team's information easier to find."
+        action={<Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Knowledge Base
-        </Button>
-      </div>
+        </Button>}
+      />
 
-      {knowledgeBases.length === 0 ? (
+      {isLoading ? (
+        <div className="flex min-h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>
+      ) : hasError ? (
+        <ErrorState onRetry={loadKnowledgeBases} />
+      ) : knowledgeBases.length === 0 ? (
         <EmptyState
           title="No knowledge bases found"
           description="Create your first knowledge base to start organizing documents"
@@ -88,19 +91,19 @@ const KnowledgeBasesPage = () => {
           type="knowledge-bases"
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {knowledgeBases.map((kb) => (
-            <Card key={kb.id} className="hover:shadow-md transition-shadow">
-              <div className="mb-3 flex items-start justify-between">
-                <h3 className="font-semibold text-gray-900">{kb.name}</h3>
+            <Card key={kb.id} className="flex min-h-52 flex-col transition duration-150 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <h3 className="font-semibold leading-6 text-gray-900">{kb.name}</h3>
                 <Badge variant={kb.indexed ? 'success' : 'warning'}>
                   {kb.indexed ? 'Indexed' : 'Not Indexed'}
                 </Badge>
               </div>
               {kb.description && (
-                <p className="mb-3 text-sm text-gray-600">{kb.description}</p>
+                <p className="mb-4 flex-1 text-sm leading-6 text-gray-600">{kb.description}</p>
               )}
-              <div className="mb-3 flex gap-2">
+              <div className="mb-4 flex flex-wrap gap-2">
                 <Badge variant="info">{ACCESS_LEVELS[kb.accessLevel]}</Badge>
                 <Badge variant="default">{kb.documentCount} documents</Badge>
               </div>
@@ -122,15 +125,12 @@ const KnowledgeBasesPage = () => {
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
           />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              rows={3}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-          </div>
+          <Textarea
+            label="Description"
+            rows={3}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
           <Select
             label="Access Level"
             value={formData.accessLevel}
@@ -138,7 +138,7 @@ const KnowledgeBasesPage = () => {
             options={Object.entries(ACCESS_LEVELS).map(([value, label]) => ({ value, label }))}
           />
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+            <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button type="submit">Create</Button>

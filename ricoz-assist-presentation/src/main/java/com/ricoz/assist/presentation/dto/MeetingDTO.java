@@ -37,7 +37,6 @@ public class MeetingDTO {
 
     private LocalDateTime actualEnd;
 
-    @NotNull(message = "Status is required")
     private Meeting.MeetingStatus status;
 
     private String transcription;

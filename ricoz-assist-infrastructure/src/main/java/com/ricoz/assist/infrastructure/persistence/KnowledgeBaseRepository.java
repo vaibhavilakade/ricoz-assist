@@ -13,6 +13,8 @@ import java.util.UUID;
 @Repository
 public interface KnowledgeBaseRepository extends JpaRepository<KnowledgeBase, UUID>, KnowledgeBaseRepositoryPort {
 
+    List<KnowledgeBase> findAllByDeletedFalse();
+
     @Query("SELECT kb FROM KnowledgeBase kb WHERE kb.indexed = true AND kb.deleted = false")
     List<KnowledgeBase> findAllIndexed();
 

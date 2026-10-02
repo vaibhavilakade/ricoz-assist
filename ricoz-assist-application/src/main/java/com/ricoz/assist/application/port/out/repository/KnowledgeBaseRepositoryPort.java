@@ -11,6 +11,8 @@ public interface KnowledgeBaseRepositoryPort {
 
     Optional<KnowledgeBase> findById(UUID id);
 
+    List<KnowledgeBase> findAllByDeletedFalse();
+
     List<KnowledgeBase> findAllIndexed();
 
     List<KnowledgeBase> findByAccessLevel(KnowledgeBase.AccessLevel accessLevel);

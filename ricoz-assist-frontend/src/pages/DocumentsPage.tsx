@@ -10,7 +10,10 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
+import Textarea from '../components/common/Textarea';
 import Select from '../components/common/Select';
+import PageHeader from '../components/common/PageHeader';
+import ErrorState from '../components/common/ErrorState';
 import { DOCUMENT_STATUSES, DOCUMENT_TYPES } from '../utils/constants';
 import { formatDateTime } from '../utils/formatting';
 import { Plus, Search } from 'lucide-react';
@@ -20,6 +23,7 @@ const DocumentsPage = () => {
   const { addToast } = useUIStore();
   const [documents, setDocuments] = useState<DocumentDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
@@ -34,11 +38,13 @@ const DocumentsPage = () => {
   }, [user?.id]);
 
   const loadDocuments = async () => {
+    setIsLoading(true);
+    setHasError(false);
     try {
       const docs = await documentService.getByOwner(user?.id || '');
       setDocuments(docs);
-    } catch (error) {
-      console.error('Failed to load documents:', error);
+    } catch {
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -52,8 +58,8 @@ const DocumentsPage = () => {
     try {
       const results = await documentService.search(searchQuery);
       setDocuments(results);
-    } catch (error) {
-      console.error('Search failed:', error);
+    } catch {
+      addToast({ type: 'error', message: 'Document search failed. Please try again.' });
     }
   };
 
@@ -84,72 +90,73 @@ const DocumentsPage = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
-        <Button onClick={() => setIsModalOpen(true)}>
+      <PageHeader
+        title="Documents"
+        description="Create, search, and manage the documents in your workspace."
+        action={<Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Document
-        </Button>
-      </div>
+        </Button>}
+      />
 
-      <div className="mb-6 flex gap-4">
-        <div className="flex flex-1">
+      {isLoading ? (
+        <div className="flex min-h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>
+      ) : hasError ? (
+        <ErrorState onRetry={loadDocuments} />
+      ) : (
+        <>
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row">
           <Input
+            aria-label="Search documents"
             placeholder="Search documents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
-        </div>
-        <Button onClick={handleSearch} variant="secondary">
-          <Search className="mr-2 h-4 w-4" />
-          Search
-        </Button>
-      </div>
+          <Button onClick={handleSearch} variant="secondary" className="shrink-0">
+            <Search className="mr-2 h-4 w-4" aria-hidden="true" />
+            Search
+          </Button>
+          </div>
 
-      {documents.length === 0 ? (
-        <EmptyState
-          title="No documents found"
-          description="Create your first document to get started"
-          action={{ label: 'Create Document', onClick: () => setIsModalOpen(true) }}
-          type="documents"
-        />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {documents.length === 0 ? (
+            <EmptyState
+              title={searchQuery ? 'No matching documents' : 'No documents yet'}
+              description={searchQuery ? 'Try a different search term or clear your search.' : 'Create your first document to get started.'}
+              action={searchQuery ? undefined : { label: 'Create Document', onClick: () => setIsModalOpen(true) }}
+              type="documents"
+            />
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {documents.map((doc) => (
-            <Card key={doc.id} className="hover:shadow-md transition-shadow">
-              <div className="mb-3 flex items-start justify-between">
-                <h3 className="font-semibold text-gray-900">{doc.title}</h3>
-                <Badge variant="info">{DOCUMENT_STATUSES[doc.status]}</Badge>
+            <Card key={doc.id} className="flex min-h-52 flex-col transition duration-150 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <h3 className="line-clamp-2 font-semibold leading-6 text-gray-900">{doc.title}</h3>
+                <Badge variant={doc.status === 'PUBLISHED' ? 'success' : doc.status === 'ARCHIVED' ? 'default' : doc.status === 'DRAFT' ? 'warning' : 'info'}>{DOCUMENT_STATUSES[doc.status]}</Badge>
               </div>
-              <p className="mb-3 text-sm text-gray-600 line-clamp-2">{doc.content || 'No content'}</p>
-              <div className="mb-3 flex items-center gap-2 text-xs text-gray-500">
+              <p className="mb-4 line-clamp-2 flex-1 text-sm leading-6 text-gray-600">{doc.content || 'No content provided.'}</p>
+              <div className="mb-4 flex items-center gap-2 text-xs text-gray-500">
                 <span>{DOCUMENT_TYPES[doc.documentType]}</span>
-                <span>•</span>
+                <span aria-hidden="true">·</span>
                 <span>v{doc.version}</span>
               </div>
-              <div className="flex items-center justify-between text-xs text-gray-500">
+              <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-500">
                 <span>{formatDateTime(doc.updatedAt)}</span>
                 <button
                   onClick={() => handleDelete(doc.id)}
-                  className="text-red-600 hover:text-red-700"
+                  type="button"
+                  className="rounded-lg px-2 py-1 font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
                 >
                   Delete
                 </button>
               </div>
             </Card>
           ))}
-        </div>
+            </div>
+          )}
+        </>
       )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create Document">
@@ -160,15 +167,12 @@ const DocumentsPage = () => {
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             required
           />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Content</label>
-            <textarea
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              rows={4}
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-            />
-          </div>
+          <Textarea
+            label="Content"
+            rows={4}
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          />
           <Select
             label="Status"
             value={formData.status}
@@ -182,7 +186,7 @@ const DocumentsPage = () => {
             options={Object.entries(DOCUMENT_TYPES).map(([value, label]) => ({ value, label }))}
           />
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+            <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button type="submit">Create</Button>

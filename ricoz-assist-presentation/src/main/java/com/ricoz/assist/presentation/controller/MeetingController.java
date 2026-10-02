@@ -1,6 +1,7 @@
 package com.ricoz.assist.presentation.controller;
 
 import com.ricoz.assist.application.service.MeetingService;
+import com.ricoz.assist.application.service.UserService;
 import com.ricoz.assist.core.domain.Meeting;
 import com.ricoz.assist.presentation.dto.MeetingDTO;
 import com.ricoz.assist.presentation.dto.mapper.MeetingMapper;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -25,7 +27,18 @@ import java.util.stream.Collectors;
 public class MeetingController {
 
     private final MeetingService meetingService;
+    private final UserService userService;
     private final MeetingMapper meetingMapper;
+
+    @GetMapping
+    @Operation(summary = "Get meetings for the authenticated user")
+    public ResponseEntity<List<MeetingDTO>> getMeetings(Authentication authentication) {
+        UUID ownerId = userService.getUserByUsername(authentication.getName()).getId();
+        List<MeetingDTO> meetings = meetingService.getMeetingsByOwner(ownerId).stream()
+                .map(meetingMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(meetings);
+    }
 
     @PostMapping
     @Operation(summary = "Create a new meeting")

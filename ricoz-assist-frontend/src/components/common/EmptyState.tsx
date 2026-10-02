@@ -1,4 +1,5 @@
 import { FileText, Calendar, CheckSquare, MessageSquare, Database } from 'lucide-react';
+import Button from './Button';
 
 interface EmptyStateProps {
   title: string;
@@ -23,19 +24,16 @@ const EmptyState = ({ title, description, action, type = 'default' }: EmptyState
   const Icon = icons[type] || icons.default;
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="mb-4 rounded-full bg-gray-100 p-4">
-        <Icon className="h-8 w-8 text-gray-400" />
+    <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white/70 px-6 py-12 text-center">
+      <div className="mb-4 rounded-2xl bg-indigo-50 p-4">
+        <Icon className="h-7 w-7 text-primary" aria-hidden="true" />
       </div>
-      <h3 className="mb-2 text-lg font-medium text-gray-900">{title}</h3>
-      <p className="mb-4 text-sm text-gray-500">{description}</p>
+      <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+      <p className="mt-1.5 max-w-md text-sm leading-6 text-gray-500">{description}</p>
       {action && (
-        <button
-          onClick={action.onClick}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
+        <Button onClick={action.onClick} className="mt-5">
           {action.label}
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,14 +27,24 @@ public class KnowledgeRetrievalService {
     @Cacheable(value = "knowledgeBases", key = "#id")
     public KnowledgeBase getKnowledgeBaseById(UUID id) {
         log.debug("Fetching knowledge base with id: {}", id);
-        return knowledgeBaseRepository.findById(id)
+        KnowledgeBase knowledgeBase = knowledgeBaseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Knowledge base not found with id: " + id));
+        if (Boolean.TRUE.equals(knowledgeBase.getDeleted())) {
+            throw new IllegalArgumentException("Knowledge base not found with id: " + id);
+        }
+        return knowledgeBase;
     }
 
     @Transactional(readOnly = true)
     public List<KnowledgeBase> getAllIndexedKnowledgeBases() {
         log.debug("Fetching all indexed knowledge bases");
         return knowledgeBaseRepository.findAllIndexed();
+    }
+
+    @Transactional(readOnly = true)
+    public List<KnowledgeBase> getAllKnowledgeBases() {
+        log.debug("Fetching all knowledge bases");
+        return knowledgeBaseRepository.findAllByDeletedFalse();
     }
 
     @Transactional(readOnly = true)
@@ -50,6 +61,24 @@ public class KnowledgeRetrievalService {
         KnowledgeBase saved = knowledgeBaseRepository.save(knowledgeBase);
         log.info("Knowledge base created with id: {}", saved.getId());
         return saved;
+    }
+
+    @Transactional
+    public KnowledgeBase updateKnowledgeBase(UUID id, KnowledgeBase knowledgeBase) {
+        KnowledgeBase existing = getKnowledgeBaseById(id);
+        existing.setName(knowledgeBase.getName());
+        existing.setDescription(knowledgeBase.getDescription());
+        existing.setAccessLevel(knowledgeBase.getAccessLevel());
+        existing.setUpdatedAt(LocalDateTime.now());
+        return knowledgeBaseRepository.save(existing);
+    }
+
+    @Transactional
+    public void deleteKnowledgeBase(UUID id) {
+        KnowledgeBase knowledgeBase = getKnowledgeBaseById(id);
+        knowledgeBase.setDeleted(true);
+        knowledgeBase.setUpdatedAt(LocalDateTime.now());
+        knowledgeBaseRepository.save(knowledgeBase);
     }
 
     @Transactional
@@ -96,7 +125,7 @@ public class KnowledgeRetrievalService {
         document.setKnowledgeBase(kb);
         documentRepository.save(document);
         
-        kb.setDocumentCount(kb.getDocumentCount() + 1);
+        kb.setDocumentCount(kb.getDocumentCount() == null ? 1 : kb.getDocumentCount() + 1);
         kb.setIndexed(false); // Re-index needed
         knowledgeBaseRepository.save(kb);
     }

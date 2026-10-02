@@ -18,22 +18,24 @@ const Toast = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2">
+    <div className="fixed bottom-4 right-4 z-[60] w-[min(24rem,calc(100vw-2rem))] space-y-2" aria-live="polite" aria-relevant="additions">
       {toasts.map((toast) => {
         const Icon = icons[toast.type];
         return (
           <div
             key={toast.id}
             className={cn(
-              'flex items-center rounded-lg border p-4 shadow-md',
+              'flex items-center rounded-xl border p-4 shadow-lg shadow-gray-900/10',
               variantClasses[toast.type]
             )}
           >
             <Icon className="h-5 w-5 flex-shrink-0" />
             <p className="ml-3 text-sm font-medium">{toast.message}</p>
             <button
+              type="button"
               onClick={() => removeToast(toast.id)}
               className="ml-auto rounded-lg p-1 hover:bg-black/10"
+              aria-label="Dismiss notification"
             >
               <X className="h-4 w-4" />
             </button>

@@ -6,7 +6,13 @@ const LoadingSpinner = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   };
 
   return (
-    <div className={`animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 ${sizeClasses[size]}`} />
+    <div
+      className={`animate-spin rounded-full border-2 border-gray-200 border-t-primary ${sizeClasses[size]}`}
+      role="status"
+      aria-label="Loading"
+    >
+      <span className="sr-only">Loading</span>
+    </div>
   );
 };
 
