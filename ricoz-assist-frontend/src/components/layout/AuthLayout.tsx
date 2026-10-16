@@ -1,57 +1,116 @@
 import { ReactNode } from 'react';
-import { BookOpen, CalendarDays, CheckSquare, Sparkles } from 'lucide-react';
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Check,
+  FileText,
+  Layers3,
+  Sparkles,
+} from 'lucide-react';
 
 interface AuthLayoutProps {
   children: ReactNode;
+  showLeftPanel?: boolean;
 }
 
-const AuthLayout = ({ children }: AuthLayoutProps) => (
-  <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-    <aside className="relative hidden overflow-hidden bg-gray-950 px-10 py-10 text-white lg:flex lg:flex-col lg:justify-between xl:px-16 xl:py-12">
-      <div className="absolute -right-28 -top-28 h-96 w-96 rounded-full border border-white/5" aria-hidden="true" />
-      <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full border border-white/5" aria-hidden="true" />
-      <div className="relative flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-base font-bold text-white">
-          R
-        </span>
-        <span className="text-lg font-semibold tracking-tight">RicozAssist</span>
-      </div>
+const Brand = ({ compact = false }: { compact?: boolean }) => (
+  <div className={`auth-brand${compact ? ' auth-brand-compact' : ''}`}>
+    <span className="auth-brand-mark" aria-hidden="true">
+      R
+    </span>
+    <span className="auth-brand-name">RicozAssist</span>
+  </div>
+);
 
-      <div className="relative max-w-xl py-16">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-indigo-200">
-          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-          Your team's workspace
+const WorkspacePreview = () => (
+  <div className="workspace-preview" aria-label="A preview of the RicozAssist workspace">
+    <div className="preview-window">
+      <div className="preview-sidebar">
+        <span className="preview-sidebar-mark">R</span>
+        <span className="preview-sidebar-line preview-sidebar-line-active" />
+        <span className="preview-sidebar-line" />
+        <span className="preview-sidebar-line preview-sidebar-line-short" />
+      </div>
+      <div className="preview-content">
+        <div className="preview-topline">
+          <span>Workspace</span>
+          <span className="preview-avatar">A</span>
         </div>
-        <h1 className="text-4xl font-semibold leading-tight tracking-tight xl:text-5xl">
-          Keep your work and knowledge in focus.
-        </h1>
-        <p className="mt-5 max-w-lg text-base leading-7 text-gray-300">
-          A shared place for documents, meetings, action items, and thoughtful AI-assisted queries.
-        </p>
-        <div className="mt-10 grid gap-3 sm:grid-cols-3">
-          {[
-            { label: 'Documents', Icon: BookOpen },
-            { label: 'Meetings', Icon: CalendarDays },
-            { label: 'Action items', Icon: CheckSquare },
-          ].map(({ label, Icon }) => (
-            <div key={label} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 text-xs font-medium text-gray-200">
-              <Icon className="h-4 w-4 text-indigo-300" aria-hidden="true" />
-              {label}
-            </div>
-          ))}
+        <div className="preview-greeting">Good morning, Alex</div>
+        <div className="preview-subtitle">Your team, in sync.</div>
+        <div className="preview-items">
+          <div className="preview-item">
+            <span className="preview-item-icon preview-icon-blue"><FileText size={15} /></span>
+            <span><strong>Project brief</strong><small>Updated just now</small></span>
+            <ArrowUpRight className="preview-item-arrow" size={15} />
+          </div>
+          <div className="preview-item">
+            <span className="preview-item-icon preview-icon-pink"><CalendarDays size={15} /></span>
+            <span><strong>Team sync</strong><small>Today · 10:30 AM</small></span>
+            <ArrowUpRight className="preview-item-arrow" size={15} />
+          </div>
+          <div className="preview-item">
+            <span className="preview-item-icon preview-icon-violet"><Check size={15} /></span>
+            <span><strong>Review launch plan</strong><small>Action item · Due today</small></span>
+            <span className="preview-check"><Check size={12} /></span>
+          </div>
         </div>
       </div>
-      <p className="relative text-xs text-gray-500">RicozAssist · Team productivity workspace</p>
-    </aside>
+    </div>
+    <div className="preview-note">
+      <span className="preview-note-icon"><Layers3 size={16} /></span>
+      <span><strong>Everything in one place</strong><small>Less searching. More doing.</small></span>
+    </div>
+    <span className="preview-sparkle" aria-hidden="true"><Sparkles size={19} /></span>
+  </div>
+);
 
-    <section className="flex min-w-0 flex-col items-center justify-center px-5 py-10 sm:px-8">
-      <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white">R</span>
-        <span className="font-semibold tracking-tight text-gray-950">RicozAssist</span>
-      </div>
-      <div className="w-full max-w-md">{children}</div>
-      <p className="mt-10 text-center text-xs text-gray-400">© RicozAssist · A clearer way to work together</p>
-    </section>
+const AuthLayout = ({ children, showLeftPanel = true }: AuthLayoutProps) => (
+  <main className="auth-page">
+    <div className="auth-backdrop" aria-hidden="true">
+      <span className="auth-glow auth-glow-blue" />
+      <span className="auth-glow auth-glow-pink" />
+      <span className="auth-glow auth-glow-violet" />
+      <span className="auth-grid" />
+    </div>
+
+    <div className={`auth-layout${showLeftPanel ? '' : ' auth-layout-centered'}`}>
+      {showLeftPanel && (
+        <aside className="auth-story">
+          <Brand />
+          <div className="auth-story-copy">
+            <div className="auth-eyebrow"><span /> Your team's workspace</div>
+            <h1>Everything your team needs, <em>in one focused workspace.</em></h1>
+            <p>
+              Bring documents, meetings, action items and knowledge together in one
+              organized workspace.
+            </p>
+            <WorkspacePreview />
+          </div>
+          <p className="auth-story-footer">A clearer way to work together <span>·</span> Built for your team</p>
+        </aside>
+      )}
+
+      <section className="auth-main" aria-label="Account access">
+        <div className="auth-mobile-header">
+          <Brand compact />
+          <div className="auth-mobile-art" aria-hidden="true">
+            <span className="auth-mobile-orbit auth-mobile-orbit-one" />
+            <span className="auth-mobile-orbit auth-mobile-orbit-two" />
+            <span className="auth-mobile-art-icon"><Layers3 size={18} /></span>
+            <span className="auth-mobile-art-dot" />
+          </div>
+        </div>
+        <div className="auth-panel">
+          <div className="auth-card-brand">
+            <span className="auth-card-brand-mark" aria-hidden="true">R</span>
+            <span>RicozAssist</span>
+          </div>
+          {children}
+        </div>
+        <p className="auth-footer">© {new Date().getFullYear()} RicozAssist <span>·</span> A clearer way to work together</p>
+      </section>
+    </div>
   </main>
 );
 

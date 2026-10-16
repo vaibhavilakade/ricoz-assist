@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
 import Input from '../components/common/Input';
-import Button from '../components/common/Button';
 import AuthLayout from '../components/layout/AuthLayout';
 import { registerSchema } from '../utils/validation';
+import { ArrowRight, Lock, Mail, User, UserCircle } from 'lucide-react';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -56,17 +56,20 @@ const RegisterPage = () => {
 
   return (
     <AuthLayout>
-      <div className="mb-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Get started</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">Create your account</h2>
-        <p className="mt-2 text-sm leading-6 text-gray-500">Set up your RicozAssist workspace access.</p>
+      <div className="auth-intro">
+        <p className="auth-kicker">Get started</p>
+        <h2 className="auth-heading">Create your account</h2>
+        <p className="auth-description">
+          Set up your RicozAssist workspace and start collaborating with your team.
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="auth-form auth-register-form">
         <Input
           id="username"
           name="username"
           label="Username"
+          icon={<User className="h-5 w-5" />}
           value={formData.username}
           onChange={handleChange}
           error={errors.username}
@@ -79,6 +82,7 @@ const RegisterPage = () => {
           name="email"
           label="Email"
           type="email"
+          icon={<Mail className="h-5 w-5" />}
           value={formData.email}
           onChange={handleChange}
           error={errors.email}
@@ -91,6 +95,7 @@ const RegisterPage = () => {
           name="password"
           label="Password"
           type="password"
+          icon={<Lock className="h-5 w-5" />}
           value={formData.password}
           onChange={handleChange}
           error={errors.password}
@@ -98,11 +103,12 @@ const RegisterPage = () => {
           disabled={isLoading}
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Input
             id="firstName"
             name="firstName"
             label="First name"
+            icon={<UserCircle className="h-5 w-5" />}
             value={formData.firstName}
             onChange={handleChange}
             placeholder="First name"
@@ -113,6 +119,7 @@ const RegisterPage = () => {
             id="lastName"
             name="lastName"
             label="Last name"
+            icon={<UserCircle className="h-5 w-5" />}
             value={formData.lastName}
             onChange={handleChange}
             placeholder="Last name"
@@ -120,14 +127,18 @@ const RegisterPage = () => {
           />
         </div>
 
-        <Button type="submit" size="lg" className="w-full" isLoading={isLoading}>
-          Create Account
-        </Button>
+        <button 
+          type="submit" 
+          className="auth-submit w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Creating account...' : <>Create account <ArrowRight size={18} aria-hidden="true" /></>}
+        </button>
       </form>
 
-      <p className="mt-7 text-center text-sm text-gray-500">
+      <p className="auth-switch">
         Already have an account?{' '}
-        <Link to="/login" className="font-semibold text-primary hover:text-primary/80">
+        <Link to="/login" className="auth-link">
           Sign in
         </Link>
       </p>
