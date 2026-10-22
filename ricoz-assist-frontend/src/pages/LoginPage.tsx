@@ -37,7 +37,19 @@ const LoginPage = () => {
       addToast({ type: 'success', message: 'Login successful' });
       navigate('/');
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      let message = 'Login failed. Please check your credentials.';
+      
+      if (error.response) {
+        // Server responded with error status
+        message = error.response.data?.message || `Login failed (${error.response.status})`;
+      } else if (error.request) {
+        // Request was made but no response received (network error)
+        message = 'Unable to connect to server. Please check your internet connection and try again.';
+      } else {
+        // Error in request setup
+        message = error.message || 'Login failed. Please try again.';
+      }
+      
       addToast({ type: 'error', message });
     } finally {
       setIsLoading(false);

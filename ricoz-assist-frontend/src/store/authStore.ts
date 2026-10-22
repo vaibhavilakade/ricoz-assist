@@ -32,9 +32,18 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             isLoading: false,
           });
-        } catch (error) {
+        } catch (error: any) {
           set({ isLoading: false });
-          throw error;
+          // Enhance error with context if needed
+          if (error.response) {
+            throw error;
+          } else if (error.request) {
+            const networkError = new Error('Network error: Unable to connect to the server');
+            (networkError as any).request = error.request;
+            throw networkError;
+          } else {
+            throw error;
+          }
         }
       },
 
