@@ -14,15 +14,13 @@ const ProfilePage = () => {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
-    phone: user?.phone || '',
-    bio: user?.bio || '',
+    phone: '',
+    bio: '',
   });
 
   const profileCompletion = [
     { label: 'Full name', completed: !!(user?.firstName && user?.lastName) },
     { label: 'Email verified', completed: !!user?.email },
-    { label: 'Phone number', completed: !!user?.phone },
-    { label: 'Bio', completed: !!user?.bio },
   ];
 
   const completedCount = profileCompletion.filter(item => item.completed).length;
@@ -46,7 +44,7 @@ const ProfilePage = () => {
         <Card className="lg:col-span-2">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
             <div className="relative group">
-              <Avatar firstName={user?.firstName || user?.username} lastName={user?.lastName} size="xl" />
+              <Avatar firstName={user?.firstName || user?.username} lastName={user?.lastName} size="lg" />
               <button
                 type="button"
                 className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
